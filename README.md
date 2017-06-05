@@ -1,5 +1,7 @@
 # Identifying Persons of Interest in the Enron Scandal
 
+![](proj_img.jpg)
+
 One of the largest corporate scandals that resulted in the bankruptcy of a multi-billion dollar corporation was the [Enron scandal](https://en.wikipedia.org/wiki/Enron_scandal). The objective of this project is develop a machine learning model to identify Persons of Interest i.e. those who were indicted, agreed to a plea bargain etc. in this scandal using the data from emails and financials that were recorded before.
 
 ## Files
