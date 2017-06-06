@@ -1,8 +1,8 @@
 import pickle
-import pprint
 import matplotlib.pyplot as plt
 import numpy as np
 from feature_format import featureFormat, targetFeatureSplit
+from sklearn.feature_selection import SelectKBest, SelectPercentile, f_classif
 
 # loading the enron data dictionary
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -53,3 +53,70 @@ scatter_plot(labels1, new_features1, "total payments and stock value")
 scatter_plot(labels2, new_features2, "shared poi receipt/ to messages")
 scatter_plot(labels3, new_features3, "to poi/ from messages")
 scatter_plot(labels4, new_features4, "from poi/ to messages")
+
+# creating a list of all labels and features
+all_features_list = ['poi',
+                     'salary',
+                     'to_messages',
+                     'deferral_payments',
+                     'total_payments',
+                     'exercised_stock_options',
+                     'bonus',
+                     'restricted_stock',
+                     'shared_receipt_with_poi',
+                     'restricted_stock_deferred',
+                     'total_stock_value',
+                     'expenses',
+                     'loan_advances',
+                     'from_messages',
+                     'other',
+                     'from_this_person_to_poi',
+                     'director_fees',
+                     'deferred_income',
+                     'long_term_incentive',
+                     'from_poi_to_this_person']
+
+# creating list of labels and list of numpy arrays containing the features
+enron_data = featureFormat(data_dict, all_features_list, sort_keys = True)
+enron_labels, enron_features = targetFeatureSplit(enron_data)
+
+# adding new features from above to the list of numpy arrays
+for i in np.arange(len(enron_features)):
+    ttl_pay_stock = enron_features[i][3] + enron_features[i][9]
+    enron_features[i] = np.append(enron_features[i], ttl_pay_stock)
+    
+    if enron_features[i][1] != 0:
+        sharedReceipt_toMsgs = enron_features[i][7] / enron_features[i][1]
+        enron_features[i] = np.append(enron_features[i], sharedReceipt_toMsgs)
+    else:
+        enron_features[i] = np.append(enron_features[i], 0.0)
+    
+    if enron_features[i][12] != 0:    
+        toPOI_fromMsgs = enron_features[i][14] / enron_features[i][12]
+        enron_features[i] = np.append(enron_features[i], toPOI_fromMsgs)
+    else:
+        enron_features[i] = np.append(enron_features[i], 0.0)
+        
+    if enron_features[i][1] != 0:  
+        fromPOI_toMsgs = enron_features[i][18] / enron_features[i][1]
+        enron_features[i] = np.append(enron_features[i], fromPOI_toMsgs)
+    else:
+        enron_features[i] = np.append(enron_features[i], 0.0)
+
+# addining new feature names to the all features list
+all_features_list.extend(["total_payments_stock",
+                          "shared_receipt_poi_to_msgs",
+                          "from_this_person_to_poi_from_msgs",
+                          "from_poi_to_this_person_to_msgs"])
+
+# listing out the best features in ascending order using SelectKBest method
+best_features = []
+for i in np.arange(1,23):
+    selector = SelectKBest(f_classif, k=i)
+    selector.fit(enron_features, enron_labels)
+    for e in np.where(selector.get_support())[0]:
+        if e not in best_features:
+            best_features.append(e)            
+print "Best features in ascending order:"
+for i in best_features:
+    print all_features_list[(i+1)]
