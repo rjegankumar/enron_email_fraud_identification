@@ -34,7 +34,7 @@ for name in data_dict:
         data_dict[name]["sharedReceipt_toMsgs"] = 0.0
 
 # function to train and predict POIs based on the features provided as input
-def rfclassifier(feat_list):    
+def rfclassifier(feat_list, c="gini", n_est=10, min_split=2, min_leaf=1):    
     # creating list of labels and list of numpy arrays containing the features
     data = featureFormat(data_dict, feat_list, sort_keys = True)
     labels, features = targetFeatureSplit(data)
@@ -53,7 +53,11 @@ def rfclassifier(feat_list):
         labels_train = [labels[i] for i in train_indices]
         labels_test = [labels[j] for j in test_indices]
         
-        clf = RandomForestClassifier(n_estimators=10, random_state=10)
+        clf = RandomForestClassifier(n_estimators=n_est, 
+                                     criterion=c,
+                                     min_samples_split=min_split,
+                                     min_samples_leaf=min_leaf,
+                                     random_state=10)
         clf.fit(features_train, labels_train)
         pred = clf.predict(features_test)
         
@@ -62,13 +66,19 @@ def rfclassifier(feat_list):
         recall.append(recall_score(labels_test, pred))
         f1.append(f1_score(labels_test, pred))
     
-    print "\n\nNB Classifier Result with features - "
+    print "\n\nNB Classifier with FEATURES - "
     for f in feat_list[1:]:
         print f
-    print "\naccuracy:", np.mean(accuracy)
+    print "\nPARAMETERS -"
+    print "n_estimators:", n_est
+    print "criterion:", c
+    print "min_samples_split:", min_split
+    print "min_samples_leaf:", min_leaf
+    print "\nEVALUATION RESULTS -"
+    print "accuracy:", np.mean(accuracy)
     print "precision:", np.mean(precision)
     print "recall:", np.mean(recall)
-    print "f1 score:", np.mean(f1)
+    print "f1:", np.mean(f1)
     
 # selecting only 2 features - total_stock_value and bonus for now
 # total_stock_value - data available for all POIs and second best feature
@@ -149,4 +159,44 @@ rfclassifier(['poi',
               'sharedReceipt_toMsgs'])
 '''
 Best of all, improvement to precision and f1 score compared to previous best
+'''
+
+# Tuning the above model with different criterion
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs',
+              'sharedReceipt_toMsgs'], "entropy")
+
+# Using criterion = entropy, and tuning n_estimators
+for i in [1,5,10,15,20,50]:
+    rfclassifier(['poi',
+                  'exercised_stock_options',
+                  'bonus',
+                  'toPOI_fromMsgs',
+                  'sharedReceipt_toMsgs'], "entropy", i)
+
+# Using criterion = entropy, n_estimators = 10, tuning min_samples_split
+for i in [2,4,8,16]:
+    rfclassifier(['poi',
+                  'exercised_stock_options',
+                  'bonus',
+                  'toPOI_fromMsgs',
+                  'sharedReceipt_toMsgs'], "entropy", 10, i)
+    
+# Using criterion = entropy, n_estimators = 10, min_samples_split = 2
+# tuning min_samples_leaf
+for i in [1,2,4,8]:
+    rfclassifier(['poi',
+                  'exercised_stock_options',
+                  'bonus',
+                  'toPOI_fromMsgs',
+                  'sharedReceipt_toMsgs'], "entropy", 10, 2, i)
+    
+'''
+final params:
+    criterion = entropy
+    n_estimators = 10
+    min_samples_split = 2
+    min_samples_leaf = 1
 '''
