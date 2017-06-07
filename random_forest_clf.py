@@ -1,7 +1,7 @@
 from feature_format import featureFormat, targetFeatureSplit
 import pickle
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.cross_validation import KFold
+from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.metrics import precision_score, recall_score, f1_score
 import numpy as np
 
@@ -45,9 +45,9 @@ def rfclassifier(feat_list, c="gini", n_est=10, min_split=2, min_leaf=1):
     recall = []
     f1 = []
     
-    kf = KFold(len(data), n_folds=4, random_state=1)
+    sss = StratifiedShuffleSplit(labels, 1000, random_state = 1)
     
-    for train_indices, test_indices in kf:
+    for train_indices, test_indices in sss:
         features_train = [features[i] for i in train_indices]
         features_test = [features[j] for j in test_indices]
         labels_train = [labels[i] for i in train_indices]
@@ -80,123 +80,123 @@ def rfclassifier(feat_list, c="gini", n_est=10, min_split=2, min_leaf=1):
     print "recall:", np.mean(recall)
     print "f1:", np.mean(f1)
     
-# selecting only 2 features - total_stock_value and bonus for now
-# total_stock_value - data available for all POIs and second best feature
-# bonus - data available for 16 out of 18 POIs and third best feature
-rfclassifier(['poi',
-              'total_stock_value',
-              'bonus'])
-
-# changing features list to replace total_stock_value with 
-# exercised_stock_option
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus'])
-'''
-Provided one of the best results with the highest precision and f1 scores
-'''
-    
-# Adding saalary to the features list
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'salary'])
-
-# Removing everything except exercised stock options
-rfclassifier(['poi',
-              'exercised_stock_options'])
-    
-# Replacing exercised stock options with bonus
-rfclassifier(['poi',
-              'bonus'])
-'''
-Provided one of the best results with the precision and recall above 0.3
-'''
-    
-# Replacing exercised stock options with bonus
-rfclassifier(['poi',
-              'salary'])
-    
-# Adding new feature to one of the best perfomring feature set
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs'])
-'''
-Best result thus far
-'''
-
-# Adding deferred income to the above list
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs',
-              'deferred_income'])
-'''
-Improvement in accuracy, but a reduction in precision and f1 score
-'''
-
-# replacing deferred_income with long_term_incentive
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs',
-              'long_term_incentive'])
-
-# replacing long_term_incentive with restricted_stock    
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs',
-              'restricted_stock'])
-
-# replacing restricted_stock with new feature ratio of shared receipts with POI
-# and to messages
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs',
-              'sharedReceipt_toMsgs'])
-'''
-Best of all, improvement to precision and f1 score compared to previous best
-'''
-
-# Tuning the above model with different criterion
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs',
-              'sharedReceipt_toMsgs'], "entropy")
-
-# Using criterion = entropy, and tuning n_estimators
-for i in [1,5,10,15,20,50]:
-    rfclassifier(['poi',
-                  'exercised_stock_options',
-                  'bonus',
-                  'toPOI_fromMsgs',
-                  'sharedReceipt_toMsgs'], "entropy", i)
-
-# Using criterion = entropy, n_estimators = 10, tuning min_samples_split
-for i in [2,4,8,16]:
-    rfclassifier(['poi',
-                  'exercised_stock_options',
-                  'bonus',
-                  'toPOI_fromMsgs',
-                  'sharedReceipt_toMsgs'], "entropy", 10, i)
-    
-# Using criterion = entropy, n_estimators = 10, min_samples_split = 2
-# tuning min_samples_leaf
-for i in [1,2,4,8]:
-    rfclassifier(['poi',
-                  'exercised_stock_options',
-                  'bonus',
-                  'toPOI_fromMsgs',
-                  'sharedReceipt_toMsgs'], "entropy", 10, 2, i)
-    
+## selecting only 2 features - total_stock_value and bonus for now
+## total_stock_value - data available for all POIs and second best feature
+## bonus - data available for 16 out of 18 POIs and third best feature
+#rfclassifier(['poi',
+#              'total_stock_value',
+#              'bonus'])
+#
+## changing features list to replace total_stock_value with 
+## exercised_stock_option
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus'])
+#'''
+#Provided one of the best results with the highest precision and f1 scores
+#'''
+#    
+## Adding saalary to the features list
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'salary'])
+#
+## Removing everything except exercised stock options
+#rfclassifier(['poi',
+#              'exercised_stock_options'])
+#    
+## Replacing exercised stock options with bonus
+#rfclassifier(['poi',
+#              'bonus'])
+#'''
+#Provided one of the best results with the precision and recall above 0.3
+#'''
+#    
+## Replacing exercised stock options with bonus
+#rfclassifier(['poi',
+#              'salary'])
+#    
+## Adding new feature to one of the best perfomring feature set
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'toPOI_fromMsgs'])
+#'''
+#Best result thus far
+#'''
+#
+## Adding deferred income to the above list
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'toPOI_fromMsgs',
+#              'deferred_income'])
+#'''
+#Improvement in accuracy, but a reduction in precision and f1 score
+#'''
+#
+## replacing deferred_income with long_term_incentive
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'toPOI_fromMsgs',
+#              'long_term_incentive'])
+#
+## replacing long_term_incentive with restricted_stock    
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'toPOI_fromMsgs',
+#              'restricted_stock'])
+#
+## replacing restricted_stock with new feature ratio of shared receipts with POI
+## and to messages
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'toPOI_fromMsgs',
+#              'sharedReceipt_toMsgs'])
+#'''
+#Best of all, improvement to precision and f1 score compared to previous best
+#'''
+#
+## Tuning the above model with different criterion
+#rfclassifier(['poi',
+#              'exercised_stock_options',
+#              'bonus',
+#              'toPOI_fromMsgs',
+#              'sharedReceipt_toMsgs'], "entropy")
+#
+## Using criterion = entropy, and tuning n_estimators
+#for i in [1,5,10,15,20,50]:
+#    rfclassifier(['poi',
+#                  'exercised_stock_options',
+#                  'bonus',
+#                  'toPOI_fromMsgs',
+#                  'sharedReceipt_toMsgs'], "entropy", i)
+#
+## Using criterion = entropy, n_estimators = 10, tuning min_samples_split
+#for i in [2,4,8,16]:
+#    rfclassifier(['poi',
+#                  'exercised_stock_options',
+#                  'bonus',
+#                  'toPOI_fromMsgs',
+#                  'sharedReceipt_toMsgs'], "entropy", 10, i)
+#    
+## Using criterion = entropy, n_estimators = 10, min_samples_split = 2
+## tuning min_samples_leaf
+#for i in [1,2,4,8]:
+#    rfclassifier(['poi',
+#                  'exercised_stock_options',
+#                  'bonus',
+#                  'toPOI_fromMsgs',
+#                  'sharedReceipt_toMsgs'], "entropy", 10, 2, i)
+#    
 '''
 final params:
-    criterion = entropy
-    n_estimators = 10
+    criterion = gini
+    n_estimators = 15
     min_samples_split = 2
     min_samples_leaf = 1
 '''
@@ -205,4 +205,4 @@ rfclassifier(['poi',
               'exercised_stock_options',
               'bonus',
               'toPOI_fromMsgs',
-              'sharedReceipt_toMsgs'], "entropy")
+              'sharedReceipt_toMsgs'], "gini", 15)
