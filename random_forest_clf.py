@@ -20,7 +20,8 @@ for name in data_dict:
         data_dict[name]["toPOI_fromMsgs"] = \
         data_dict[name]["from_this_person_to_poi"] * 1.0\
         /data_dict[name]["from_messages"]
-        
+    else:
+        data_dict[name]["toPOI_fromMsgs"] = 0.0
 
 # function to train and predict POIs based on the features provided as input
 def rfclassifier(feat_list):    
@@ -95,3 +96,36 @@ Provided one of the best results with the precision and recall above 0.3
 # Replacing exercised stock options with bonus
 rfclassifier(['poi',
               'salary'])
+    
+# Adding new feature to one of the best perfomring feature set
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs'])
+'''
+Best result thus far
+'''
+
+# Adding deferred income to the above list
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs',
+              'deferred_income'])
+'''
+Improvement in accuracy, but a reduction in precision and f1 score
+'''
+
+# replacing deferred_income with long_term_incentive
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs',
+              'long_term_incentive'])
+
+# replacing long_term_incentive with restricted_stock    
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs',
+              'restricted_stock'])
