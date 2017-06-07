@@ -12,7 +12,8 @@ with open("final_project_dataset.pkl", "r") as data_file:
 # removing 'TOTAL' outlier
 del data_dict['TOTAL']
 
-# Adding new feature = ratio of from this person to POI and from messages
+# Adding new feature = ratio of from this person to POI and from messages and
+# ratio of shared receipts with POI and to messages
 for name in data_dict:
     if data_dict[name]["from_this_person_to_poi"] != "NaN" and\
     data_dict[name]["from_messages"] != "NaN" and\
@@ -138,3 +139,14 @@ rfclassifier(['poi',
               'bonus',
               'toPOI_fromMsgs',
               'restricted_stock'])
+
+# replacing restricted_stock with new feature ratio of shared receipts with POI
+# and to messages
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs',
+              'sharedReceipt_toMsgs'])
+'''
+Best of all, improvement to precision and f1 score compared to previous best
+'''
