@@ -200,3 +200,9 @@ final params:
     min_samples_split = 2
     min_samples_leaf = 1
 '''
+print "\n\nFINAL MODEL:"
+rfclassifier(['poi',
+              'exercised_stock_options',
+              'bonus',
+              'toPOI_fromMsgs',
+              'sharedReceipt_toMsgs'], "entropy")
