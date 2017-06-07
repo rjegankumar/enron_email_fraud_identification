@@ -23,7 +23,7 @@ for name in data_dict:
         
 
 # function to train and predict POIs based on the features provided as input
-def nbclassifier(feat_list):    
+def rfclassifier(feat_list):    
     # creating list of labels and list of numpy arrays containing the features
     data = featureFormat(data_dict, feat_list, sort_keys = True)
     labels, features = targetFeatureSplit(data)
@@ -62,13 +62,13 @@ def nbclassifier(feat_list):
 # selecting only 2 features - total_stock_value and bonus for now
 # total_stock_value - data available for all POIs and second best feature
 # bonus - data available for 16 out of 18 POIs and third best feature
-nbclassifier(['poi',
+rfclassifier(['poi',
               'total_stock_value',
               'bonus'])
 
 # changing features list to replace total_stock_value with 
 # exercised_stock_option
-nbclassifier(['poi',
+rfclassifier(['poi',
               'exercised_stock_options',
               'bonus'])
 '''
@@ -76,22 +76,22 @@ Provided one of the best results with the highest precision and f1 scores
 '''
     
 # Adding saalary to the features list
-nbclassifier(['poi',
+rfclassifier(['poi',
               'exercised_stock_options',
               'bonus',
               'salary'])
 
 # Removing everything except exercised stock options
-nbclassifier(['poi',
+rfclassifier(['poi',
               'exercised_stock_options'])
     
 # Replacing exercised stock options with bonus
-nbclassifier(['poi',
+rfclassifier(['poi',
               'bonus'])
 '''
 Provided one of the best results with the precision and recall above 0.3
 '''
     
 # Replacing exercised stock options with bonus
-nbclassifier(['poi',
+rfclassifier(['poi',
               'salary'])
