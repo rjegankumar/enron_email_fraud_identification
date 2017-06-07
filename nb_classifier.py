@@ -68,7 +68,10 @@ nbclassifier(['poi',
 # Removing everything except exercised stock options
 nbclassifier(['poi',
               'exercised_stock_options'])
-
+'''
+Provided the best results with the highest f1, recall and accuracy scores
+'''
+    
 # Replacing exercised stock options with bonus
 nbclassifier(['poi',
               'bonus'])
