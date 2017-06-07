@@ -20,6 +20,26 @@ with open("final_project_dataset.pkl", "r") as data_file:
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
 del data_dict['TOTAL']
+
+for name in data_dict:
+    if data_dict[name]["from_this_person_to_poi"] != "NaN" and\
+    data_dict[name]["from_messages"] != "NaN" and\
+    data_dict[name]["from_messages"] != 0.0:
+        data_dict[name]["toPOI_fromMsgs"] = \
+        data_dict[name]["from_this_person_to_poi"] * 1.0\
+        /data_dict[name]["from_messages"]
+    else:
+        data_dict[name]["toPOI_fromMsgs"] = 0.0
+        
+    if data_dict[name]["shared_receipt_with_poi"] != "NaN" and\
+    data_dict[name]["to_messages"] != "NaN" and\
+    data_dict[name]["to_messages"] != 0.0:
+        data_dict[name]["sharedReceipt_toMsgs"] = \
+        data_dict[name]["shared_receipt_with_poi"] * 1.0\
+        /data_dict[name]["to_messages"]
+    else:
+        data_dict[name]["sharedReceipt_toMsgs"] = 0.0
+
 my_dataset = data_dict
 
 ### Extract features and labels from dataset for local testing
