@@ -22,6 +22,15 @@ for name in data_dict:
         /data_dict[name]["from_messages"]
     else:
         data_dict[name]["toPOI_fromMsgs"] = 0.0
+        
+    if data_dict[name]["shared_receipt_with_poi"] != "NaN" and\
+    data_dict[name]["to_messages"] != "NaN" and\
+    data_dict[name]["to_messages"] != 0.0:
+        data_dict[name]["sharedReceipt_toMsgs"] = \
+        data_dict[name]["shared_receipt_with_poi"] * 1.0\
+        /data_dict[name]["to_messages"]
+    else:
+        data_dict[name]["sharedReceipt_toMsgs"] = 0.0
 
 # function to train and predict POIs based on the features provided as input
 def rfclassifier(feat_list):    
