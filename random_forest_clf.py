@@ -12,6 +12,16 @@ with open("final_project_dataset.pkl", "r") as data_file:
 # removing 'TOTAL' outlier
 del data_dict['TOTAL']
 
+# Adding new feature = ratio of from this person to POI and from messages
+for name in data_dict:
+    if data_dict[name]["from_this_person_to_poi"] != "NaN" and\
+    data_dict[name]["from_messages"] != "NaN" and\
+    data_dict[name]["from_messages"] != 0.0:
+        data_dict[name]["toPOI_fromMsgs"] = \
+        data_dict[name]["from_this_person_to_poi"] * 1.0\
+        /data_dict[name]["from_messages"]
+        
+
 # function to train and predict POIs based on the features provided as input
 def nbclassifier(feat_list):    
     # creating list of labels and list of numpy arrays containing the features
