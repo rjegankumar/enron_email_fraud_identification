@@ -86,19 +86,19 @@ for i in np.arange(len(enron_features)):
     enron_features[i] = np.append(enron_features[i], ttl_pay_stock)
     
     if enron_features[i][1] != 0:
-        sharedReceipt_toMsgs = enron_features[i][7] / enron_features[i][1]
+        sharedReceipt_toMsgs = enron_features[i][7] * 1.0 / enron_features[i][1]
         enron_features[i] = np.append(enron_features[i], sharedReceipt_toMsgs)
     else:
         enron_features[i] = np.append(enron_features[i], 0.0)
     
     if enron_features[i][12] != 0:    
-        toPOI_fromMsgs = enron_features[i][14] / enron_features[i][12]
+        toPOI_fromMsgs = enron_features[i][14] * 1.0 / enron_features[i][12]
         enron_features[i] = np.append(enron_features[i], toPOI_fromMsgs)
     else:
         enron_features[i] = np.append(enron_features[i], 0.0)
         
     if enron_features[i][1] != 0:  
-        fromPOI_toMsgs = enron_features[i][18] / enron_features[i][1]
+        fromPOI_toMsgs = enron_features[i][18] * 1.0 / enron_features[i][1]
         enron_features[i] = np.append(enron_features[i], fromPOI_toMsgs)
     else:
         enron_features[i] = np.append(enron_features[i], 0.0)
