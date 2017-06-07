@@ -65,8 +65,8 @@ from sklearn.naive_bayes import GaussianNB
 nb = GaussianNB()
 
 from sklearn.ensemble import RandomForestClassifier
-rf = RandomForestClassifier(n_estimators=10, 
-                            criterion="entropy",
+rf = RandomForestClassifier(n_estimators=15, 
+                            criterion="gini",
                             min_samples_split=2,
                             min_samples_leaf=1,
                             random_state=10)

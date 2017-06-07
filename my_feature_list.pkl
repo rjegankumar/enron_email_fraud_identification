@@ -3,4 +3,10 @@ S'poi'
 p1
 aS'exercised_stock_options'
 p2
+aS'bonus'
+p3
+aS'toPOI_fromMsgs'
+p4
+aS'sharedReceipt_toMsgs'
+p5
 a.
