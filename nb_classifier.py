@@ -13,17 +13,17 @@ with open("final_project_dataset.pkl", "r") as data_file:
 del data_dict['TOTAL']
 
 # function to train and predict POIs based on the features provided as input
-def nbclassifier(feat_list):    
+def nbclassifier(feat_list):
     # creating list of labels and list of numpy arrays containing the features
     data = featureFormat(data_dict, feat_list, sort_keys = True)
     labels, features = targetFeatureSplit(data)
-    
+
     # Fitting and testing Gaussian Naive Bayes Classifier
     accuracy = []
     precision = []
     recall = []
     f1 = []
-    
+
     kf = KFold(len(data), n_folds=4, random_state=1)
     for train_indices, test_indices in kf:
         features_train = [features[i] for i in train_indices]
@@ -37,7 +37,7 @@ def nbclassifier(feat_list):
         precision.append(precision_score(labels_test, pred))
         recall.append(recall_score(labels_test, pred))
         f1.append(f1_score(labels_test, pred))
-    
+
     print "\n\nNB Classifier Result with features - "
     for f in feat_list[1:]:
         print f
@@ -45,7 +45,7 @@ def nbclassifier(feat_list):
     print "precision:", np.mean(precision)
     print "recall:", np.mean(recall)
     print "f1 score:", np.mean(f1)
-    
+
 # selecting only 2 features - total_stock_value and bonus for now
 # total_stock_value - data available for all POIs and second best feature
 # bonus - data available for 16 out of 18 POIs and third best feature
@@ -53,7 +53,7 @@ nbclassifier(['poi',
               'total_stock_value',
               'bonus'])
 
-# changing features list to replace total_stock_value with 
+# changing features list to replace total_stock_value with
 # exercised_stock_option
 nbclassifier(['poi',
               'exercised_stock_options',
@@ -69,9 +69,9 @@ nbclassifier(['poi',
 nbclassifier(['poi',
               'exercised_stock_options'])
 '''
-Provided the best results with the highest f1, recall and accuracy scores
+Provided the best results with the highest f1 score
 '''
-    
+
 # Replacing exercised stock options with bonus
 nbclassifier(['poi',
               'bonus'])
