@@ -1,7 +1,7 @@
 from feature_format import featureFormat, targetFeatureSplit
 import pickle
 from sklearn.naive_bayes import GaussianNB
-from sklearn.cross_validation import KFold
+from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.metrics import precision_score, recall_score, f1_score
 import numpy as np
 
@@ -24,15 +24,18 @@ def nbclassifier(feat_list):
     recall = []
     f1 = []
 
-    kf = KFold(len(data), n_folds=4, random_state=1)
-    for train_indices, test_indices in kf:
+    sss = StratifiedShuffleSplit(labels, 1000, random_state = 1)
+
+    for train_indices, test_indices in sss:
         features_train = [features[i] for i in train_indices]
         features_test = [features[j] for j in test_indices]
         labels_train = [labels[i] for i in train_indices]
         labels_test = [labels[j] for j in test_indices]
+
         clf = GaussianNB()
         clf.fit(features_train, labels_train)
         pred = clf.predict(features_test)
+
         accuracy.append(clf.score(features_test, labels_test))
         precision.append(precision_score(labels_test, pred))
         recall.append(recall_score(labels_test, pred))
