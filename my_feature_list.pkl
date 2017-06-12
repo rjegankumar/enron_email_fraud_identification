@@ -1,12 +1,12 @@
 (lp0
 S'poi'
 p1
-aS'exercised_stock_options'
+aS'salary'
 p2
-aS'bonus'
+aS'exercised_stock_options'
 p3
-aS'toPOI_fromMsgs'
+aS'bonus'
 p4
-aS'sharedReceipt_toMsgs'
+aS'total_stock_value'
 p5
 a.
