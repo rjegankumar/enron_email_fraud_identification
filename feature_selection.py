@@ -87,33 +87,12 @@ for i in np.arange(len(enron_features)):
     ttl_pay_stock = enron_features[i][3] + enron_features[i][9]
     enron_features[i] = np.append(enron_features[i], ttl_pay_stock)
 
-    if enron_features[i][1] != 0:
-        sharedReceipt_toMsgs = enron_features[i][7] * 1.0 / enron_features[i][1]
-        enron_features[i] = np.append(enron_features[i], sharedReceipt_toMsgs)
-    else:
-        enron_features[i] = np.append(enron_features[i], 0.0)
-
-    if enron_features[i][12] != 0:
-        toPOI_fromMsgs = enron_features[i][14] * 1.0 / enron_features[i][12]
-        enron_features[i] = np.append(enron_features[i], toPOI_fromMsgs)
-    else:
-        enron_features[i] = np.append(enron_features[i], 0.0)
-
-    if enron_features[i][1] != 0:
-        fromPOI_toMsgs = enron_features[i][18] * 1.0 / enron_features[i][1]
-        enron_features[i] = np.append(enron_features[i], fromPOI_toMsgs)
-    else:
-        enron_features[i] = np.append(enron_features[i], 0.0)
-
 # addining new feature names to the all features list
-all_features_list.extend(["total_payments_stock",
-                          "shared_receipt_poi_to_msgs",
-                          "from_this_person_to_poi_from_msgs",
-                          "from_poi_to_this_person_to_msgs"])
+all_features_list.extend(["total_payments_stock"])
 
 # listing out the best features in ascending order using SelectKBest method
 best_features = {}
-selector = SelectKBest(f_classif, k=23)
+selector = SelectKBest(f_classif, k=20)
 selector.fit(enron_features, enron_labels)
 for i, s in enumerate(selector.scores_):
     best_features[all_features_list[(i+1)]] = s
