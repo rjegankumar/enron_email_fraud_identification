@@ -15,6 +15,43 @@ with open("final_project_dataset.pkl", "r") as data_file:
 # removing 'TOTAL' outlier
 del data_dict['TOTAL']
 
+# creating new features
+for name in data_dict:
+    if data_dict[name]["total_payments"] != "NaN" and\
+    data_dict[name]["total_stock_value"] != "NaN":
+        data_dict[name]["ttl_pay_stock"] = \
+        data_dict[name]["total_payments"] + \
+        data_dict[name]["total_stock_value"]
+    else:
+        data_dict[name]["ttl_pay_stock"] = 0.0
+
+    if data_dict[name]["from_this_person_to_poi"] != "NaN" and\
+    data_dict[name]["from_messages"] != "NaN" and\
+    data_dict[name]["from_messages"] != 0.0:
+        data_dict[name]["toPOI_fromMsgs"] = \
+        data_dict[name]["from_this_person_to_poi"] * 1.0\
+        /data_dict[name]["from_messages"]
+    else:
+        data_dict[name]["toPOI_fromMsgs"] = 0.0
+
+    if data_dict[name]["shared_receipt_with_poi"] != "NaN" and\
+    data_dict[name]["to_messages"] != "NaN" and\
+    data_dict[name]["to_messages"] != 0.0:
+        data_dict[name]["sharedReceipt_toMsgs"] = \
+        data_dict[name]["shared_receipt_with_poi"] * 1.0\
+        /data_dict[name]["to_messages"]
+    else:
+        data_dict[name]["sharedReceipt_toMsgs"] = 0.0
+
+    if data_dict[name]["from_poi_to_this_person"] != "NaN" and\
+    data_dict[name]["to_messages"] != "NaN" and\
+    data_dict[name]["to_messages"] != 0.0:
+        data_dict[name]["fromPOI_toMsgs"] = \
+        data_dict[name]["from_poi_to_this_person"] * 1.0\
+        /data_dict[name]["to_messages"]
+    else:
+        data_dict[name]["fromPOI_toMsgs"] = 0.0
+
 # list containing all labels and features except email
 feat_list = ['poi',
               'salary',
@@ -35,7 +72,11 @@ feat_list = ['poi',
               'director_fees',
               'deferred_income',
               'long_term_incentive',
-              'from_poi_to_this_person']
+              'from_poi_to_this_person',
+              'ttl_pay_stock',
+              'toPOI_fromMsgs',
+              'sharedReceipt_toMsgs',
+              'fromPOI_toMsgs']
 
 # Selecting the best features using GridSearchCV
 data = featureFormat(data_dict, feat_list, sort_keys = True)
