@@ -25,33 +25,6 @@ for name in data_dict:
     else:
         data_dict[name]["ttl_pay_stock"] = 0.0
 
-    if data_dict[name]["from_this_person_to_poi"] != "NaN" and\
-    data_dict[name]["from_messages"] != "NaN" and\
-    data_dict[name]["from_messages"] != 0.0:
-        data_dict[name]["toPOI_fromMsgs"] = \
-        data_dict[name]["from_this_person_to_poi"] * 1.0\
-        /data_dict[name]["from_messages"]
-    else:
-        data_dict[name]["toPOI_fromMsgs"] = 0.0
-
-    if data_dict[name]["shared_receipt_with_poi"] != "NaN" and\
-    data_dict[name]["to_messages"] != "NaN" and\
-    data_dict[name]["to_messages"] != 0.0:
-        data_dict[name]["sharedReceipt_toMsgs"] = \
-        data_dict[name]["shared_receipt_with_poi"] * 1.0\
-        /data_dict[name]["to_messages"]
-    else:
-        data_dict[name]["sharedReceipt_toMsgs"] = 0.0
-
-    if data_dict[name]["from_poi_to_this_person"] != "NaN" and\
-    data_dict[name]["to_messages"] != "NaN" and\
-    data_dict[name]["to_messages"] != 0.0:
-        data_dict[name]["fromPOI_toMsgs"] = \
-        data_dict[name]["from_poi_to_this_person"] * 1.0\
-        /data_dict[name]["to_messages"]
-    else:
-        data_dict[name]["fromPOI_toMsgs"] = 0.0
-
 # list containing all labels and features except email
 feat_list = ['poi',
               'salary',
@@ -73,10 +46,7 @@ feat_list = ['poi',
               'deferred_income',
               'long_term_incentive',
               'from_poi_to_this_person',
-              'ttl_pay_stock',
-              'toPOI_fromMsgs',
-              'sharedReceipt_toMsgs',
-              'fromPOI_toMsgs']
+              'ttl_pay_stock']
 
 # Selecting the best features using GridSearchCV
 data = featureFormat(data_dict, feat_list, sort_keys = True)
@@ -84,7 +54,7 @@ labels, features = targetFeatureSplit(data)
 
 pipe = Pipeline([('KBest', SelectKBest()),
                 ('clf', GaussianNB())])
-K = [1,2,3,4,5,6]
+K = [1,2,3,4,5]
 param_grid = [{'KBest__k': K}]
 
 gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='f1')
@@ -102,9 +72,7 @@ final_feat_list = ['poi',
                     'salary',
                     'exercised_stock_options',
                     'bonus',
-                    'total_stock_value',
-                    'ttl_pay_stock',
-                    'toPOI_fromMsgs']
+                    'total_stock_value']
 
 # Computing evaluation metrics using the selected features
 final_data = featureFormat(data_dict, final_feat_list, sort_keys = True)
