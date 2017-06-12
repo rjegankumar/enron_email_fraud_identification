@@ -82,38 +82,29 @@ feat_list = ['poi',
 data = featureFormat(data_dict, feat_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
-best_params = []
-best_score = []
-best_features = []
+pipe = Pipeline([('KBest', SelectKBest()),
+                ('clf', GaussianNB())])
+K = [1,2,3,4,5,6]
+param_grid = [{'KBest__k': K}]
 
-sss = StratifiedShuffleSplit(labels, 1000, random_state = 42)
+gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='f1')
+gs.fit(features, labels)
 
-for train_indices, test_indices in sss:
-    features_train = [features[i] for i in train_indices]
-    features_test = [features[j] for j in test_indices]
-    labels_train = [labels[i] for i in train_indices]
-    labels_test = [labels[j] for j in test_indices]
+kb = SelectKBest(k=gs.best_params_['KBest__k'])
+kb.fit(features, labels)
+best_feat = list(kb.get_support(indices=True)+1)
 
-    pipe = Pipeline([('KBest', SelectKBest()),
-                    ('clf', GaussianNB())])
-    K = [1,2,3,4,5,6]
-    param_grid = [{'KBest__k': K}]
+print "Best f1 score:", gs.best_score_
+print "No. of features used for the best f1 score:", gs.best_params_['KBest__k']
+print "Names of features used:\n", [feat_list[i] for i in best_feat]
 
-    gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='f1')
-    gs.fit(features_train, labels_train)
-
-    best_params.append(gs.best_params_['KBest__k'])
-    best_score.append(gs.best_score_)
-
-    kb = SelectKBest(k=gs.best_params_['KBest__k'])
-    kb.fit(features_train, labels_train)
-    best_features.append(list(kb.get_support(indices=True)+1))
-
-print "Best f1 score:", max(best_score)
-print "No. of features used for the best f1 score:", best_params[best_score.index(max(best_score))]
-print "Names of features used:\n", [feat_list[i] for i in best_features[best_score.index(max(best_score))]]
-
-final_feat_list = ['poi', 'exercised_stock_options', 'bonus', 'total_stock_value']
+final_feat_list = ['poi',
+                    'salary',
+                    'exercised_stock_options',
+                    'bonus',
+                    'total_stock_value',
+                    'ttl_pay_stock',
+                    'toPOI_fromMsgs']
 
 # Computing evaluation metrics using the selected features
 final_data = featureFormat(data_dict, final_feat_list, sort_keys = True)
