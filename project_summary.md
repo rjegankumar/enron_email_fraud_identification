@@ -52,7 +52,7 @@ The features did not need scaling for either of the algorithms as it wouldn't ha
 
 As mentioned before, two algorithms for identifying POIs were used - Gaussian Naive Bayes and Random Forest. I used the Random Forest as the final model as it gave the highest F1 score. One contrasting difference that was apparent was that the Naive Bayes classifier was much faster than Random Forest.
 
-Tuning was an important step in achieving a higher F1 score for the Random Forest classifier. Several parameters were systematically tested - criterion, n_estimators, min_samples_split and min_samples_leaf, and final parameters selected were those that gave the highest F1 score:
+Tuning in a broad sense is to identify close to optimal conditions or options for the machine learning model to perform the best with the given data. Testing out different combinations of model parameters and observing the outputs will help us decipher which settings work best together. Tuning was an important step in achieving a higher F1 score for the Random Forest classifier. Several parameters were systematically tested - criterion, n_estimators, min_samples_split and min_samples_leaf, and final parameters selected were those that gave the highest F1 score:
 
 - criterion = gini
 - n_estimators = 15
