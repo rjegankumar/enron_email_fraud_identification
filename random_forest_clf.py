@@ -2,7 +2,10 @@ from feature_format import featureFormat, targetFeatureSplit
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cross_validation import StratifiedShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import SelectKBest
+from sklearn.grid_search import GridSearchCV
 import numpy as np
 
 # loading the enron data dictionary
@@ -12,73 +15,183 @@ with open("final_project_dataset.pkl", "r") as data_file:
 # removing 'TOTAL' outlier
 del data_dict['TOTAL']
 
-# Adding new feature = ratio of from this person to POI and from messages and
-# ratio of shared receipts with POI and to messages
+# creating new features
 for name in data_dict:
-    if data_dict[name]["from_this_person_to_poi"] != "NaN" and\
-    data_dict[name]["from_messages"] != "NaN" and\
-    data_dict[name]["from_messages"] != 0.0:
-        data_dict[name]["toPOI_fromMsgs"] = \
-        data_dict[name]["from_this_person_to_poi"] * 1.0\
-        /data_dict[name]["from_messages"]
+    if data_dict[name]["total_payments"] != "NaN" and\
+    data_dict[name]["total_stock_value"] != "NaN":
+        data_dict[name]["ttl_pay_stock"] = \
+        data_dict[name]["total_payments"] + \
+        data_dict[name]["total_stock_value"]
     else:
-        data_dict[name]["toPOI_fromMsgs"] = 0.0
+        data_dict[name]["ttl_pay_stock"] = 0.0
 
-    if data_dict[name]["shared_receipt_with_poi"] != "NaN" and\
-    data_dict[name]["to_messages"] != "NaN" and\
-    data_dict[name]["to_messages"] != 0.0:
-        data_dict[name]["sharedReceipt_toMsgs"] = \
-        data_dict[name]["shared_receipt_with_poi"] * 1.0\
-        /data_dict[name]["to_messages"]
-    else:
-        data_dict[name]["sharedReceipt_toMsgs"] = 0.0
+# list containing all labels and features except email
+feat_list = ['poi',
+              'salary',
+              'to_messages',
+              'deferral_payments',
+              'total_payments',
+              'exercised_stock_options',
+              'bonus',
+              'restricted_stock',
+              'shared_receipt_with_poi',
+              'restricted_stock_deferred',
+              'total_stock_value',
+              'expenses',
+              'loan_advances',
+              'from_messages',
+              'other',
+              'from_this_person_to_poi',
+              'director_fees',
+              'deferred_income',
+              'long_term_incentive',
+              'from_poi_to_this_person',
+              'ttl_pay_stock']
 
-# function to train and predict POIs based on the features provided as input
-def rfclassifier(feat_list, c="gini", n_est=10, min_split=2, min_leaf=1):
-    # creating list of labels and list of numpy arrays containing the features
-    data = featureFormat(data_dict, feat_list, sort_keys = True)
-    labels, features = targetFeatureSplit(data)
+# Selecting the best features using GridSearchCV
+data = featureFormat(data_dict, feat_list, sort_keys = True)
+labels, features = targetFeatureSplit(data)
 
-    # Fitting and testing Gaussian Naive Bayes Classifier
-    accuracy = []
-    precision = []
-    recall = []
-    f1 = []
+pipe = Pipeline([('KBest', SelectKBest()),
+                ('clf', RandomForestClassifier(n_estimators=15,
+                                                criterion="gini",
+                                                random_state=20))])
+K = [1,2,3,4,5]
+param_grid = [{'KBest__k': K}]
 
-    sss = StratifiedShuffleSplit(labels, 1000, random_state = 1)
+gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='f1')
+gs.fit(features, labels)
 
-    for train_indices, test_indices in sss:
-        features_train = [features[i] for i in train_indices]
-        features_test = [features[j] for j in test_indices]
-        labels_train = [labels[i] for i in train_indices]
-        labels_test = [labels[j] for j in test_indices]
+kb = SelectKBest(k=gs.best_params_['KBest__k'])
+kb.fit(features, labels)
+best_feat = list(kb.get_support(indices=True)+1)
 
-        clf = RandomForestClassifier(n_estimators=n_est,
-                                     criterion=c,
-                                     min_samples_split=min_split,
-                                     min_samples_leaf=min_leaf,
-                                     random_state=10)
-        clf.fit(features_train, labels_train)
-        pred = clf.predict(features_test)
+print "Best f1 score:", gs.best_score_
+print "No. of features used for the best f1 score:", gs.best_params_['KBest__k']
+print "Names of features used:\n", [feat_list[i] for i in best_feat]
 
-        accuracy.append(clf.score(features_test, labels_test))
-        precision.append(precision_score(labels_test, pred))
-        recall.append(recall_score(labels_test, pred))
-        f1.append(f1_score(labels_test, pred))
+final_feat_list = ['poi',
+                    'exercised_stock_options',
+                    'bonus',
+                    'total_stock_value']
 
-    print "\n\nRF Classifier with FEATURES - "
-    for f in feat_list[1:]:
-        print f
-    print "\nPARAMETERS -"
-    print "n_estimators:", n_est
-    print "criterion:", c
-    print "min_samples_split:", min_split
-    print "min_samples_leaf:", min_leaf
-    print "\nEVALUATION RESULTS -"
-    print "accuracy:", np.mean(accuracy)
-    print "precision:", np.mean(precision)
-    print "recall:", np.mean(recall)
-    print "f1:", np.mean(f1)
+# Computing evaluation metrics using the selected features
+final_data = featureFormat(data_dict, final_feat_list, sort_keys = True)
+final_labels, final_features = targetFeatureSplit(final_data)
+
+final_sss = StratifiedShuffleSplit(final_labels, 1000, random_state = 42)
+
+accuracy = []
+precision = []
+recall = []
+f1 = []
+
+for train_indices, test_indices in final_sss:
+    features_train = [final_features[i] for i in train_indices]
+    features_test = [final_features[j] for j in test_indices]
+    labels_train = [final_labels[i] for i in train_indices]
+    labels_test = [final_labels[j] for j in test_indices]
+
+    clf = RandomForestClassifier(n_estimators=15,
+                                    criterion="gini",
+                                    random_state=20)
+    clf.fit(features_train, labels_train)
+    pred = clf.predict(features_test)
+
+    accuracy.append(accuracy_score(labels_test, pred))
+    precision.append(precision_score(labels_test, pred))
+    recall.append(recall_score(labels_test, pred))
+    f1.append(f1_score(labels_test, pred))
+
+print "Evaluation results of GaussianNB using best features:"
+print "Mean Accuracy:", np.mean(accuracy)
+print "Mean Precision:", np.mean(precision)
+print "Mean Recall:", np.mean(recall)
+print "Mean f1 score:", np.mean(f1)
+
+
+# final_feat_list = ['poi', 'exercised_stock_options', 'bonus', 'total_stock_value']
+#
+# # Computing evaluation metrics using the selected features
+# final_data = featureFormat(data_dict, final_feat_list, sort_keys = True)
+# final_labels, final_features = targetFeatureSplit(final_data)
+#
+# final_sss = StratifiedShuffleSplit(final_labels, 1000, random_state = 42)
+#
+# accuracy = []
+# precision = []
+# recall = []
+# f1 = []
+#
+# for train_indices, test_indices in final_sss:
+#     features_train = [final_features[i] for i in train_indices]
+#     features_test = [final_features[j] for j in test_indices]
+#     labels_train = [final_labels[i] for i in train_indices]
+#     labels_test = [final_labels[j] for j in test_indices]
+#
+#     clf = GaussianNB()
+#     clf.fit(features_train, labels_train)
+#     pred = clf.predict(features_test)
+#
+#     accuracy.append(accuracy_score(labels_test, pred))
+#     precision.append(precision_score(labels_test, pred))
+#     recall.append(recall_score(labels_test, pred))
+#     f1.append(f1_score(labels_test, pred))
+#
+# print "Evaluation results of GaussianNB using best features:"
+# print "Mean Accuracy:", np.mean(accuracy)
+# print "Mean Precision:", np.mean(precision)
+# print "Mean Recall:", np.mean(recall)
+# print "Mean f1 score:", np.mean(f1)
+
+
+
+# # function to train and predict POIs based on the features provided as input
+# def rfclassifier(feat_list, c="gini", n_est=10, min_split=2, min_leaf=1):
+#     # creating list of labels and list of numpy arrays containing the features
+#     data = featureFormat(data_dict, feat_list, sort_keys = True)
+#     labels, features = targetFeatureSplit(data)
+#
+#     # Fitting and testing Gaussian Naive Bayes Classifier
+#     accuracy = []
+#     precision = []
+#     recall = []
+#     f1 = []
+#
+#     sss = StratifiedShuffleSplit(labels, 1000, random_state = 1)
+#
+#     for train_indices, test_indices in sss:
+#         features_train = [features[i] for i in train_indices]
+#         features_test = [features[j] for j in test_indices]
+#         labels_train = [labels[i] for i in train_indices]
+#         labels_test = [labels[j] for j in test_indices]
+#
+#         clf = RandomForestClassifier(n_estimators=n_est,
+#                                      criterion=c,
+#                                      min_samples_split=min_split,
+#                                      min_samples_leaf=min_leaf,
+#                                      random_state=10)
+#         clf.fit(features_train, labels_train)
+#         pred = clf.predict(features_test)
+#
+#         accuracy.append(clf.score(features_test, labels_test))
+#         precision.append(precision_score(labels_test, pred))
+#         recall.append(recall_score(labels_test, pred))
+#         f1.append(f1_score(labels_test, pred))
+#
+#     print "\n\nRF Classifier with FEATURES - "
+#     for f in feat_list[1:]:
+#         print f
+#     print "\nPARAMETERS -"
+#     print "n_estimators:", n_est
+#     print "criterion:", c
+#     print "min_samples_split:", min_split
+#     print "min_samples_leaf:", min_leaf
+#     print "\nEVALUATION RESULTS -"
+#     print "accuracy:", np.mean(accuracy)
+#     print "precision:", np.mean(precision)
+#     print "recall:", np.mean(recall)
+#     print "f1:", np.mean(f1)
 
 ## selecting only 2 features - total_stock_value and bonus for now
 ## total_stock_value - data available for all POIs and second best feature
@@ -193,16 +306,16 @@ def rfclassifier(feat_list, c="gini", n_est=10, min_split=2, min_leaf=1):
 #                  'toPOI_fromMsgs',
 #                  'sharedReceipt_toMsgs'], "entropy", 10, 2, i)
 #
-'''
-final params:
-    criterion = gini
-    n_estimators = 15
-    min_samples_split = 2
-    min_samples_leaf = 1
-'''
-print "\n\nFINAL MODEL:"
-rfclassifier(['poi',
-              'exercised_stock_options',
-              'bonus',
-              'toPOI_fromMsgs',
-              'sharedReceipt_toMsgs'], "gini", 15)
+# '''
+# final params:
+#     criterion = gini
+#     n_estimators = 15
+#     min_samples_split = 2
+#     min_samples_leaf = 1
+# '''
+# print "\n\nFINAL MODEL:"
+# rfclassifier(['poi',
+#               'exercised_stock_options',
+#               'bonus',
+#               'toPOI_fromMsgs',
+#               'sharedReceipt_toMsgs'], "gini", 15)
