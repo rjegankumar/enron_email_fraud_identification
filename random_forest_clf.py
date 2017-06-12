@@ -53,11 +53,13 @@ data = featureFormat(data_dict, feat_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
 pipe = Pipeline([('KBest', SelectKBest()),
-                ('clf', RandomForestClassifier(n_estimators=15,
-                                                criterion="gini",
-                                                random_state=20))])
-K = [1,2,3,4,5]
-param_grid = [{'KBest__k': K}]
+                ('clf', RandomForestClassifier())])
+param_grid = [{'KBest__k': [1,2,3,4,5],
+                'clf__n_estimators': [5,10,15,20,25],
+                'clf__criterion': ['entropy','gini'],
+                'clf__random_state': [20],
+                'clf__min_samples_split': [2,4,8,16,32],
+                'clf__min_samples_leaf': [1,2,4,8,16]}]
 
 gs = GridSearchCV(estimator=pipe, param_grid=param_grid, scoring='f1')
 gs.fit(features, labels)
@@ -69,6 +71,10 @@ best_feat = list(kb.get_support(indices=True)+1)
 print "Best f1 score:", gs.best_score_
 print "No. of features used for the best f1 score:", gs.best_params_['KBest__k']
 print "Names of features used:\n", [feat_list[i] for i in best_feat]
+print "No. of estimators used:", gs.best_params_['clf__n_estimators']
+print "Criterion used:", gs.best_params_['clf__criterion']
+print "Min samples split used:", gs.best_params_['clf__min_samples_split']
+print "Min samples leaf used:", gs.best_params_['clf__min_samples_leaf']
 
 final_feat_list = ['poi',
                     'exercised_stock_options',
